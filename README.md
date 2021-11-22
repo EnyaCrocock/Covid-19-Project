@@ -48,9 +48,27 @@ This is my first SQL and Power BI Project
   ```
   ![image](https://user-images.githubusercontent.com/94410139/142781938-46d505b5-e2bc-4955-9185-a19e9111c5ff.png)
 
-### Covid Status by Location
+### 🔷 Covid Status by LOCATION
+
   ```sql
-  -- 1. Total Cases vs Total Deaths (By Date)
+  -- 1. Total Cases vs Population (By Date)
+  --    What % of the population has been infected with Covid-19 
+
+  SELECT 
+    location,
+    date,
+    population,
+    total_cases,
+    total_deaths,
+    ROUND(((total_cases / population) * 100), 2) AS percentage_population_infected
+  FROM Portfolio_Project..covid_deaths_update
+  -- WHERE location LIKE '%Ireland%'
+  ORDER BY location, date
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142910858-bf968b70-b337-480c-b775-0d12c37d193f.png) 
+  
+  ```sql
+  -- 2. Total Cases vs Total Deaths (By Date)
   --    What % of people infected with Covid-19 have passed away
 
   SELECT 
@@ -62,21 +80,161 @@ This is my first SQL and Power BI Project
   FROM Portfolio_Project..covid_deaths_update
   -- WHERE location LIKE '%Spain%'
   ORDER BY location, date
- ```
-  ![image](https://user-images.githubusercontent.com/94410139/142782262-6ec5b4ef-585b-4908-aa9e-1c4c7693a19a.png)
-
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142910765-4fb390ca-012b-417b-bc29-4c456ee89a3e.png)
+  
   ```sql
-  -- 2. Total Cases vs Population (By Date)
-  --    What % of the population has been infected with Covid-19 
+  -- 3. Highest Infection Rates (in Total)
+  --    What countries have the highest infection rates compared to their population
 
   SELECT 
     location,
-    date,
     population,
-    total_cases,
-    total_deaths,
-    ROUND(((total_cases / population) * 100), 2) AS percentage_population_infected
+    MAX(total_cases) AS total_cases,
+    ROUND(MAX(total_cases) / population * 100, 2) AS percentage_population_infected
   FROM Portfolio_Project..covid_deaths_update
-  -- WHERE location LIKE '%Spain%'
-  ORDER BY location, date
+  WHERE continent IS NOT NULL
+  GROUP BY location, population
+  ORDER BY percentage_population_infected DESC
   ```
+  ![image](https://user-images.githubusercontent.com/94410139/142910484-585ffd72-0465-4af4-86ff-2293a1e7ae4f.png)
+ 
+  ```sql
+  -- 4. Highest Death Counts (In Total)
+  --    What countries have the highest death counts compared to their population
+  
+  SELECT
+    location,
+    population,
+    MAX(CAST(total_deaths AS INT)) AS total_deaths,
+    ROUND(MAX(CAST(total_deaths AS INT)) / population * 100 , 3) AS percentage_population_deceased
+  FROM Portfolio_Project..covid_deaths_update
+  WHERE continent IS NOT NULL
+  GROUP BY location, population
+  ORDER BY percentage_population_deceased DESC
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142910366-9ec3c64a-3ccb-411d-9014-32605289067d.png)
+  
+  ```sql
+  -- 4.1 Highest Case Fatality Rates
+  --     What % of people infected passed away
+   
+  SELECT
+    location,
+    population,
+    MAX(total_cases) AS total_cases,
+    MAX(CAST(total_deaths AS INT)) AS total_deaths,
+    ROUND(MAX(CAST(total_deaths AS INT)) / MAX(total_cases) * 100 , 2) AS case_fatality
+  FROM Portfolio_Project..covid_deaths_update
+  WHERE continent IS NOT NULL
+  GROUP BY location, population
+  ORDER BY case_fatality DESC
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142911445-8f03ce10-f494-41e4-b403-acb42b69a660.png)
+  
+### 🔷 Covid Status by CONTINENT
+
+  ```sql
+  -- 5.1 Continents with the Highest Number of Cases
+
+  SELECT
+    continent,
+    SUM(CAST(new_cases AS INT)) AS total_cases
+  FROM Portfolio_Project..covid_deaths_update
+  WHERE continent IS NOT NULL
+  GROUP BY continent
+  ORDER BY total_cases DESC
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142912901-2c3e2820-0a30-433e-9e82-d2057ae687d8.png)
+  
+  ```sql
+  -- 5.2 Continents with Highest Infection Rates
+  --     Continents in order of % of population that has gotten infected 
+  
+  SElECT
+    location,
+    population,
+    MAX(CAST(total_cases AS INT)) AS total_cases,
+    ROUND(MAX(CAST(total_cases AS INT)) / population * 100, 2) AS percentage_population_infected
+  FROM Portfolio_Project..covid_deaths_update
+  WHERE 
+    continent IS NULL 
+    AND location IN ('South America', 'North America', 'Europe', 'Oceania', 'Africa', 'Asia')
+  GROUP BY location, population
+  ORDER BY percentage_population_infected DESC
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142918154-7d3bc2fd-d46f-463c-8e6e-330cf7928448.png)
+
+  ```sql
+  -- 5.3 Continents with the Highest Death Counts
+  
+  SELECT
+    continent,
+    SUM(CAST(new_deaths AS INT)) AS total_deaths
+  FROM Portfolio_Project..covid_deaths_update
+  WHERE continent IS NOT NULL
+  GROUP BY continent
+  ORDER BY total_deaths DESC
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142918269-3f606e20-d49e-4132-aa9d-03507dc0a1d1.png)
+  
+  ```sql
+  -- 5.4 Continents with Highest Death Rates
+  --     Continents in order of % of population that has passed away 
+
+  SElECT
+    location,
+    population,
+    MAX(CAST(total_deaths AS INT)) AS total_deaths,
+    ROUND(MAX(CAST(total_deaths AS INT)) / population * 100, 2) AS percentage_population_deceased
+  FROM Portfolio_Project..covid_deaths_update
+  WHERE 
+    continent IS NULL 
+    AND location IN ('South America', 'North America', 'Europe', 'Oceania', 'Africa', 'Asia')
+  GROUP BY location, population
+  ORDER BY percentage_population_deceased DESC
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142918487-7d7e2596-db33-4435-8cb0-1c8863fb5c9a.png)
+
+### 🔷 Global Numbers
+
+  ```sql
+  -- 6.1 Total Global Cases, Deaths and Recoveries
+  --     Total number of cases, deaths and Recoveries, as well as case fatality, worldwide and by continent
+  
+  SELECT  
+   location,
+    SUM(new_cases) AS total_cases,
+    SUM(CAST(new_deaths AS INT)) AS total_deaths,
+    SUM(new_cases) - SUM(CAST(new_deaths AS INT)) AS total_recovered,
+    ROUND((SUM(CAST(new_deaths AS INT)) / SUM(new_cases)) * 100, 2) AS case_fatality
+  FROM Portfolio_Project..covid_deaths_update
+  WHERE location IN ('Asia', 'Africa', 'Europe', 'North America', 'South America', 'Oceania', 'World')
+  GROUP BY location
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142920569-1ea4cec0-5136-4c77-991d-dd138437bee4.png)
+
+### 🔶 Vaccinations
+
+  ```sql
+  -- 7.1 Rolling Count 
+  --     Shows a rolling count of the new vaccinations administered by day for each country
+
+  SElECT
+    dea.continent,
+    dea.location,
+    dea.date,
+    dea.population,
+    vac.new_vaccinations,
+    SUM(CAST(vac.new_vaccinations AS BIGINT)) OVER(PARTITION BY dea.location ORDER BY dea.location, dea.date) AS vaccination_rolling_count
+  FROM Portfolio_Project..covid_deaths_update AS dea
+    JOIN Portfolio_Project..covid_vaccinations_update AS vac 
+    ON dea.location =vac.location AND dea.date = vac.date
+  WHERE 
+    dea.continent IS NOT NULL
+  -- AND dea.location LIKE '%Ireland%'
+  ORDER BY dea.location, dea.date
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/142950128-07a38b95-34b4-48c9-96ff-256dec02d8e2.png)
+  
+  
