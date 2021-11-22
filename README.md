@@ -17,7 +17,16 @@ This is my first SQL and Power BI Project
 - Dashboard = Microsoft Power BI
 
 ---
+### Table of Contents
+  - [SQL Data Exploration](#sql-data-exploration)
+    - [Downloading, Modifying and Importing Data](#downloading-modifying-and-importing-data) 
+    - [SQL Server Queries](#sql-server-queries)
+      - [Covid Status by Location](#-covid-status-by-location)
+      - [Covid Status by Continent](#-covid-status-by-continent)
+      - [Global Numbers](#-global-numbers)
+      - [Vaccinations](#-vaccinations)
 
+---
 # SQL Data Exploration
 
 ## Downloading, Modifying and Importing Data
@@ -48,7 +57,7 @@ This is my first SQL and Power BI Project
   ```
   ![image](https://user-images.githubusercontent.com/94410139/142781938-46d505b5-e2bc-4955-9185-a19e9111c5ff.png)
 
-### 🔷 Covid Status by LOCATION
+### 🔷 Covid Status by Location
 
   ```sql
   -- 1. Total Cases vs Population (By Date)
@@ -132,7 +141,7 @@ This is my first SQL and Power BI Project
   ```
   ![image](https://user-images.githubusercontent.com/94410139/142911445-8f03ce10-f494-41e4-b403-acb42b69a660.png)
   
-### 🔷 Covid Status by CONTINENT
+### 🔷 Covid Status by continent
 
   ```sql
   -- 5.1 Continents with the Highest Number of Cases
