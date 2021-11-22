@@ -141,7 +141,7 @@ This is my first SQL and Power BI Project
   ```
   ![image](https://user-images.githubusercontent.com/94410139/142911445-8f03ce10-f494-41e4-b403-acb42b69a660.png)
   
-### 🔷 Covid Status by continent
+### 🔷 Covid Status by Continent
 
   ```sql
   -- 5.1 Continents with the Highest Number of Cases
