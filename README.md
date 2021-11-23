@@ -246,4 +246,78 @@ This is my first SQL and Power BI Project
   ```
   ![image](https://user-images.githubusercontent.com/94410139/142950128-07a38b95-34b4-48c9-96ff-256dec02d8e2.png)
   
+  ```sql
+  -- 7.3 Vaccination Percentages by Day
+  --     Shows how much of the population of each country has at least 1 dose, only has 1 dose or is fully vaccinated (By day)
+  --     Are new people getting vaccinated? is the percentage of partially vaccinated (one dose) going up? 
   
+  SElECT
+    dea.continent,
+    dea.location,
+    dea.date,
+    dea.population,
+    ROUND((CAST(vac.people_vaccinated AS BIGINT) / dea.population) * 100, 2) AS percentage_at_least_one_dose,
+    ROUND(((CAST(vac.people_vaccinated AS BIGINT) - CAST(vac.people_fully_vaccinated AS BIGINT)) / dea.population) * 100, 2) AS percentage_one_dose,
+    ROUND((vac.people_fully_vaccinated / dea.population) * 100, 2) AS percentage_fully_vaccinated
+  FROM Portfolio_Project..covid_deaths_update AS dea
+    JOIN Portfolio_Project..covid_vaccinations_update AS vac 
+    ON dea.location = vac.location AND dea.date = vac.date
+  WHERE 
+    dea.continent IS NOT NULL
+  -- AND dea.location LIKE '%United States%'
+  ORDER BY dea.location, dea.date	
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/143029604-c11cc56f-027e-4caa-aa12-002b7431c932.png)
+  
+  ```sql
+  -- 7.3 Total Vaccination Percentages by Country
+  --     Total % population vaccinated (at least 1 dose), partially vaccinated (1 dose) and fully vaccinated by Country. 
+
+  -- STEP 1: Creating a temporary table with the vaccination percentages by date
+  
+  SElECT
+    dea.continent,
+    dea.location,
+    dea.date,
+    dea.population,
+    ROUND((CAST(vac.people_vaccinated AS BIGINT) / dea.population) * 100, 2) AS percentage_at_least_one_dose,
+    ROUND(((CAST(vac.people_vaccinated AS BIGINT) - CAST(vac.people_fully_vaccinated AS BIGINT)) / dea.population) * 100, 2) AS percentage_one_dose,
+    ROUND((vac.people_fully_vaccinated / dea.population) * 100, 2) AS percentage_fully_vaccinated
+  INTO #daily_vaccination_percentages
+  FROM Portfolio_Project..covid_deaths_update AS dea
+    JOIN Portfolio_Project..covid_vaccinations_update AS vac 
+    ON dea.location = vac.location AND dea.date = vac.date
+  WHERE dea.continent IS NOT NULL
+  ORDER BY dea.location, dea.date	
+  
+  -- STEP 2: Creating a second temporary table with the latest (max) vaccination percentages
+  --         As these percentages can only go up, the max will equal the latest figures. 
+  
+  SELECT
+    location,
+    population,
+    MAX(percentage_at_least_one_dose) AS percentage_at_least_one_dose,
+    MAX(percentage_fully_vaccinated) AS percentage_fully_vaccinated
+  INTO #max_vaccination_percentages
+  FROM #daily_vaccination_percentages
+  WHERE percentage_fully_vaccinated IS NOT NULL
+  GROUP BY location, population
+  ORDER BY percentage_fully_vaccinated DESC
+  
+  -- STEP 3: Joining both tables as to obtain the up to date percentage of the population with only one dose
+  --         As this percentage can go up and down depending on the new number of new people getting vaccinated, 
+  --         the up to date figure will be the one that equals the MAX % of vaccinated and fully vaccinated. 
+
+  SELECT 
+    DISTINCT mvp.location,
+    mvp.population,
+    mvp.percentage_at_least_one_dose,
+    dvp.percentage_one_dose,
+    mvp.percentage_fully_vaccinated
+  FROM #daily_vaccination_percentages AS dvp
+    JOIN #max_vaccination_percentages AS mvp
+    ON dvp.percentage_at_least_one_dose = mvp.percentage_at_least_one_dose AND dvp.percentage_fully_vaccinated = mvp. percentage_fully_vaccinated
+  ORDER BY mvp.percentage_fully_vaccinated DESC
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/143032233-439e37ca-c99c-42d2-b2cf-0a383de910fc.png)
+
