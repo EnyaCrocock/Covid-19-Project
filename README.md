@@ -16,6 +16,9 @@ This is my first SQL and Power BI Project
 - Data Exploration = Microsoft SQL Server
 - Dashboard = Microsoft Power BI
 
+#### Files
+- SQL Code
+- Interactive Dashboard = [Click Here](https://app.powerbi.com/view?r=eyJrIjoiNGIyZDA2OWEtNjNmZS00NjY3LThkZjktNjlkZDg2MTEyM2EyIiwidCI6ImU3ZjUzZjNmLTYzNmItNDNhZC04MDdlLTU3Yzk2NmZmN2RiOCIsImMiOjh9) 
 ---
 ### Table of Contents
   - [SQL Data Exploration](#sql-data-exploration)
@@ -25,6 +28,7 @@ This is my first SQL and Power BI Project
       - [Covid Status by Continent](#-covid-status-by-continent)
       - [Global Numbers](#-global-numbers)
       - [Vaccinations](#-vaccinations)
+  - [Dashboard](#dashboard)
 
 ---
 # SQL Data Exploration
@@ -222,6 +226,23 @@ This is my first SQL and Power BI Project
   GROUP BY location
   ```
   ![image](https://user-images.githubusercontent.com/94410139/142920569-1ea4cec0-5136-4c77-991d-dd138437bee4.png)
+  
+  ```sql
+  -- 6.2 Covid Totals by Location
+  --    What are the total cases, total deaths and total recoveries by Location (Country)
+  
+  SELECT
+    continent,
+    location,
+    population,
+    MAX(total_cases) AS total_cases,
+    MAX(CAST(total_deaths AS INT)) AS total_deaths,
+    MAX(total_cases) - MAX(CAST(total_deaths AS INT)) AS total_recoveries
+  FROM Portfolio_Project..covid_deaths_update
+  WHERE continent IS NOT NULL
+  GROUP BY continent, location, population
+  ```
+ ![image](https://user-images.githubusercontent.com/94410139/143239674-ad8e210f-73c5-4f87-bdd8-3c3b06cdaa95.png)
 
 ### 🔶 Vaccinations
 
@@ -320,4 +341,77 @@ This is my first SQL and Power BI Project
   ORDER BY mvp.percentage_fully_vaccinated DESC
   ```
   ![image](https://user-images.githubusercontent.com/94410139/143032233-439e37ca-c99c-42d2-b2cf-0a383de910fc.png)
+  
+  ```sql
+  -- 7.4 Vaccination Global Numbers
+  --     Total doses administered, as well as the total % population vaccinated (at least 1 dose), 
+  --     partially vaccinated (1 dose) and fully vaccinated Worldwide and by Continent. 
+  
+  -- STEP 1: Creating a temporary table with the doses administered and vaccination percentages by date for the locations we need
+
+  SElECT
+    dea.continent,
+    dea.location,
+    dea.date,
+    dea.population,
+    vac.total_vaccinations,
+    ROUND(CAST(vac.people_vaccinated AS BIGINT) / dea.population *100, 2) AS percentage_at_least_one_dose,
+    ROUND((CAST(vac.people_vaccinated AS BIGINT) - CAST(vac.people_fully_vaccinated AS BIGINT)) / dea.population *100, 2) AS percentage_one_dose,
+    ROUND(vac.people_fully_vaccinated / dea.population * 100, 2) AS percentage_fully_vaccinated
+  INTO #daily_vaccination_percentages_globe
+  FROM Portfolio_Project..covid_deaths_update AS dea
+    JOIN Portfolio_Project..covid_vaccinations_update AS vac 
+    ON dea.location = vac.location AND dea.date = vac.date
+  WHERE dea.location IN ('Asia', 'Africa', 'Europe', 'North America', 'South America', 'Oceania', 'World')
+  ORDER BY dea.location, dea.date	
+
+  -- STEP 2: Creating a second temporary table with the latest (max) doses administered and vaccination percentages
+
+  SELECT
+    location,
+    population,
+    MAX(CAST(TOTAL_vaccinations AS BIGINT)) AS doses_administered,
+    MAX(percentage_at_least_one_dose) AS percentage_at_least_one_dose,
+    MAX(percentage_fully_vaccinated) AS percentage_fully_vaccinated
+  INTO #max_vaccination_percentages_globe
+  FROM #daily_vaccination_percentages_globe
+  WHERE percentage_fully_vaccinated IS NOT NULL
+  GROUP BY location, population
+  ORDER BY percentage_fully_vaccinated DESC
+
+  --STEP 3: Joining both tables as to obtain the up to date percentage of the population with only one dose
+
+  SELECT 
+    DISTINCT mvpg.location,
+    mvpg.population,
+    mvpg.doses_administered,
+    mvpg.percentage_at_least_one_dose,
+    dvpg.percentage_one_dose,
+    mvpg.percentage_fully_vaccinated
+  FROM #daily_vaccination_percentages_globe AS dvpg
+    JOIN #max_vaccination_percentages_globe AS mvpg
+    ON dvpg.percentage_at_least_one_dose = mvpg.percentage_at_least_one_dose AND dvpg.percentage_fully_vaccinated = mvpg. percentage_fully_vaccinated
+  ORDER BY mvpg.percentage_fully_vaccinated DESC
+  ```
+  ![image](https://user-images.githubusercontent.com/94410139/143237146-c204e2a2-45ee-44f5-945f-a697d0dd3925.png)
+  
+  ---
+  
+# Dashboard
+
+  - Using information obtained from SQL I then designed two dashboards:
+  
+    - One to show the **Covid Situation** around the world
+    
+      ![image](https://user-images.githubusercontent.com/94410139/143240365-06c085ce-ceae-4828-90c4-81486debe326.png)
+     
+    - The other to show the **Vaccination Progress**
+    
+      ![image](https://user-images.githubusercontent.com/94410139/143241968-e7ea49e7-e068-4ce7-aa74-be70fbb51843.png)   
+
+  - To view the interactive dashboard click [Here](https://app.powerbi.com/view?r=eyJrIjoiNGIyZDA2OWEtNjNmZS00NjY3LThkZjktNjlkZDg2MTEyM2EyIiwidCI6ImU3ZjUzZjNmLTYzNmItNDNhZC04MDdlLTU3Yzk2NmZmN2RiOCIsImMiOjh9) 
+  
+  
+
+  
 
