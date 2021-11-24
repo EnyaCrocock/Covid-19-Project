@@ -16,8 +16,8 @@ This is my first SQL and Power BI Project
 - Data Exploration = Microsoft SQL Server
 - Dashboard = Microsoft Power BI
 
-#### Files
-- SQL Code
+#### 🔗 Links
+- SQL Code = [Click Here For SQL File](https://github.com/EnyaCrocock/Covid-19-Project/blob/main/covid_queries.sql) 
 - Interactive Dashboard = [Click Here](https://app.powerbi.com/view?r=eyJrIjoiNGIyZDA2OWEtNjNmZS00NjY3LThkZjktNjlkZDg2MTEyM2EyIiwidCI6ImU3ZjUzZjNmLTYzNmItNDNhZC04MDdlLTU3Yzk2NmZmN2RiOCIsImMiOjh9) 
 ---
 ### Table of Contents
