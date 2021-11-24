@@ -61,7 +61,7 @@ This is my first SQL and Power BI Project
   ```
   ![image](https://user-images.githubusercontent.com/94410139/142781938-46d505b5-e2bc-4955-9185-a19e9111c5ff.png)
 
-### 🔷 Covid Status by Location
+### 🔹 Covid Status by Location
 
   ```sql
   -- 1. Total Cases vs Population (By Date)
@@ -145,7 +145,7 @@ This is my first SQL and Power BI Project
   ```
   ![image](https://user-images.githubusercontent.com/94410139/142911445-8f03ce10-f494-41e4-b403-acb42b69a660.png)
   
-### 🔷 Covid Status by Continent
+### 🔹 Covid Status by Continent
 
   ```sql
   -- 5.1 Continents with the Highest Number of Cases
@@ -209,7 +209,7 @@ This is my first SQL and Power BI Project
   ```
   ![image](https://user-images.githubusercontent.com/94410139/142918487-7d7e2596-db33-4435-8cb0-1c8863fb5c9a.png)
 
-### 🔷 Global Numbers
+### 🔹 Global Numbers
 
   ```sql
   -- 6.1 Total Global Cases, Deaths and Recoveries
@@ -244,7 +244,7 @@ This is my first SQL and Power BI Project
   ```
  ![image](https://user-images.githubusercontent.com/94410139/143239674-ad8e210f-73c5-4f87-bdd8-3c3b06cdaa95.png)
 
-### 🔶 Vaccinations
+### 🔸 Vaccinations
 
   ```sql
   -- 7.1 Rolling Count 
